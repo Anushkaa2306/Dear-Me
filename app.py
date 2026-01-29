@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 app = Flask(__name__)
 app.secret_key = "chronos_vault_ultra_secret"
 
-# 1. DATABASE LOGIC FIRST
+# 1. DATABASE CONFIG
 if os.environ.get('DATABASE_URL'):
     database_url = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 else:
@@ -18,24 +18,14 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 2. THEN INITIALIZE DB
-# --- FILE UPLOAD CONFIG ---
+# 2. UPLOAD CONFIG
 UPLOAD_FOLDER = 'static/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 
 
 db = SQLAlchemy(app)
-with app.app_context():
-  try:
-        db.create_all()
-        print("Database tables initialized!")
-    except Exception as e:
-        print(f"Database already exists or error: {e}")
-# --- LOGIN MANAGER ---
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
 
-# --- MODELS ---
+# 3. MODELS (Must be defined before db.create_all())
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -56,6 +46,18 @@ class DiaryEntry(db.Model):
     content = db.Column(db.Text, nullable=False)
     date_posted = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+# 4. INITIALIZE TABLES
+with app.app_context():
+    try:
+        db.create_all()
+        print("Database tables initialized!")
+    except Exception as e:
+        print(f"Database error: {e}")
+
+# 5. LOGIN MANAGER
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -167,6 +169,4 @@ def delete(id):
     return redirect(request.referrer or url_for('index'))
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     app.run(debug=True, host='0.0.0.0')
