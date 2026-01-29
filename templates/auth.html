@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chronos Vault - Access</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+      <link rel="stylesheet" href="../static/css/auth.css">
+</head>
+<body>
+    <div class="auth-card">
+        <h1 style="font-family: 'Goldman'; color: #f6b7b7;">{{ mode.upper() }}</h1>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}{% for m in messages %}<div class="alert">{{ m }}</div>{% endfor %}{% endif %}
+        {% endwith %}
+        <form method="POST">
+            <input type="text" name="username" placeholder="Guardian Username" required>
+            <input type="password" name="password" placeholder="Passkey" required>
+            <button type="submit">{{ 'INITIALIZE' if mode == 'register' else 'DECRYPT' }}</button>
+        </form>
+        {% if mode == 'login' %}
+            <a href="/register" class="toggle-link">New Guardian? Register</a>
+        {% else %}
+            <a href="/login" class="toggle-link">Already a Guardian? Login</a>
+        {% endif %}
+    </div>
+</body>
+</html>

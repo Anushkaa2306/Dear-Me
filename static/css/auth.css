@@ -1,0 +1,22 @@
+body { 
+            background: #0a0b10; font-family: 'Segoe UI', sans-serif; height: 100vh;
+            display: flex; justify-content: center; align-items: center; margin: 0;
+            background-image: url('https://img.freepik.com/free-vector/background-abstract-colorful_23-2148462463.jpg');
+            background-size: cover;
+        }
+        .auth-card {
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(20px);
+            padding: 40px; border-radius: 30px; border: 1px solid rgba(246, 183, 183, 0.3);
+            width: 350px; text-align: center; color: white;
+        }
+        input { 
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: none;
+            background: rgba(255,255,255,0.1); color: white; box-sizing: border-box; outline: none;
+        }
+        button { 
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: #f6b7b7; color: #000; font-weight: bold; cursor: pointer; margin-top: 15px;
+        }
+        .toggle-link { color: #00f2ff; text-decoration: none; font-size: 0.8rem; display: block; margin-top: 15px; }
+        .alert { background: #ff4d4d33; color: #ff8888; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
+    

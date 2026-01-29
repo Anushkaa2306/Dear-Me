@@ -1,0 +1,87 @@
+ @import url('https://fonts.googleapis.com/css2?family=Goldman:wght@400;700&display=swap');
+        
+        :root {
+            --accent: #010202;
+            --bg: #0a0b10;
+            --glass-pink: #f6b7b78e;
+            --border: rgba(255, 255, 255, 0.2);
+            --sidebar-width: 260px;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            display: flex;
+            min-height: 100vh;
+            background-image: url('https://img.freepik.com/free-vector/background-abstract-colorful_23-2148462463.jpg?semt=ais_hybrid&w=740&q=80');
+            background-attachment: fixed;
+            background-size: 120% 120%;
+            background-position: center;
+            transition: background-position 0.2s ease-out;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            overflow-x: hidden;
+            
+        }
+        body::before{
+            filter: blur(10px);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border);
+            height: 100vh;
+            position: fixed;
+            display: flex; flex-direction: column;
+            padding: 30px 20px;
+            z-index: 100;
+            
+        }
+
+        .profile-box { text-align: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+        .profile-img { width: 80px; height: 80px; border-radius: 50%; border: 3px solid white; margin-bottom: 10px; }
+
+        .nav-links a {
+            text-decoration: none; color: #fff; padding: 12px 15px;
+            border-radius: 12px; transition: 0.3s; display: flex; align-items: center; gap: 12px; margin-bottom: 10px;
+        }
+        .nav-links a:hover, .nav-links a.active { background: var(--glass-pink); color: var(--accent); font-weight: bold; }
+
+        /* --- CONTENT LAYOUT --- */
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 50px;
+        }
+        .main-layout { display: flex; max-width: 1200px; margin: 0 auto; gap: 30px; align-items: flex-start; }
+        .content-area { flex: 2; min-width: 0; }
+
+        /* --- CUTE TODAY TARGET BOX --- */
+        .today-target-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            border: 2px solid #f6b7b7;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 15px rgba(246, 183, 183, 0.3);
+            position: relative;
+        }
+        .target-header { display: flex; align-items: center; gap: 8px; color: #f6b7b7; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .heart-pulse { animation: pulse-pink 1.5s infinite; color: #d891a2; }
+        @keyframes pulse-pink { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+        /* --- HISTORY SIDEBAR --- */
+        .history-sidebar { flex: 1; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(15px); border: 1px solid var(--border); padding: 20px; border-radius: 24px; max-height: 85vh; overflow-y: auto; position: sticky; top: 40px; }
+        .history-sidebar h2 { font-size: 1.1rem; color: #f6b7b7; text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .history-item { position: relative; background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid #f6b7b7; }
+        .history-msg { margin: 0; font-size: 0.95rem; color: white; }
+        .hist-delete { position: absolute; top: 5px; right: 10px; text-decoration: none; color: #ff4d4d; font-weight: bold; }
+
+        /* --- GENERAL UI --- */
+        h1 { font-family: "Goldman"; font-size: 45px; color: #f68686; text-shadow: 4px 4px 2px #000; margin-bottom: 30px; }
+        .input-card { background: var(--glass-pink); backdrop-filter: blur(10px); border: 2px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 30px; }
+        textarea { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 10px; color: white; padding: 15px; box-sizing: border-box; resize: none; outline: none; }
+        .capsule-item, .diary-entry { background: var(--glass-pink); border: 1px solid var(--border); padding: 20px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .reveal-text { margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        .delete-btn { background: white; color: red; padding: 5px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold; }
+        .alert { background: #00f2ff; color: black; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
