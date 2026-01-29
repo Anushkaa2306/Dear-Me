@@ -8,13 +8,20 @@ from datetime import datetime, timezone
 
 app = Flask(__name__)
 app.secret_key = "chronos_vault_ultra_secret"
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chronos.db'
+
+# --- SMART DATABASE LOGIC ---
+# Checks if we are on Vercel (DATABASE_URL) or Mac (SQLite)
+if os.environ.get('DATABASE_URL'):
+    database_url = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
+else:
+    database_url = 'sqlite:///chronos.db'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # --- FILE UPLOAD CONFIG ---
-# This folder will store the uploaded images
 UPLOAD_FOLDER = 'static/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# Limit file size to 2MB
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 
 
 db = SQLAlchemy(app)
@@ -28,12 +35,9 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    # New column: stores the filename of the user's photo
     profile_pic = db.Column(db.String(200), nullable=True, default='default_avatar.png')
     capsules = db.relationship('Capsule', backref='owner', lazy=True)
     diary_entries = db.relationship('DiaryEntry', backref='owner', lazy=True)
-
-# ... (Keep Capsule and DiaryEntry models the same) ...
 
 class Capsule(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,7 +56,7 @@ class DiaryEntry(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# --- NEW PHOTO UPLOAD ROUTE ---
+# --- ROUTES ---
 
 @app.route('/upload_photo', methods=['POST'])
 @login_required
@@ -67,24 +71,14 @@ def upload_photo():
         return redirect(request.referrer)
 
     if file:
-        # Create unique filename: user1_timestamp.jpg
         ext = file.filename.rsplit('.', 1)[1].lower()
         filename = secure_filename(f"user{current_user.id}_{int(datetime.now().timestamp())}.{ext}")
-        
-        # Ensure the directory exists
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-        
-        # Save file
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        
-        # Update database
         current_user.profile_pic = filename
         db.session.commit()
-        
         flash("Vault profile updated!", "success")
     return redirect(request.referrer)
-
-# ... (Keep /register, /login, /logout, /index, etc. exactly as you have them) ...
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
