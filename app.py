@@ -26,7 +26,11 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024
 
 db = SQLAlchemy(app)
 with app.app_context():
-    db.create_all()
+  try:
+        db.create_all()
+        print("Database tables initialized!")
+    except Exception as e:
+        print(f"Database already exists or error: {e}")
 # --- LOGIN MANAGER ---
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
