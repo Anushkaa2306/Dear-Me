@@ -9,8 +9,7 @@ from datetime import datetime, timezone
 app = Flask(__name__)
 app.secret_key = "chronos_vault_ultra_secret"
 
-# --- SMART DATABASE LOGIC ---
-# Checks if we are on Vercel (DATABASE_URL) or Mac (SQLite)
+# 1. DATABASE LOGIC FIRST
 if os.environ.get('DATABASE_URL'):
     database_url = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 else:
@@ -19,6 +18,7 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# 2. THEN INITIALIZE DB
 # --- FILE UPLOAD CONFIG ---
 UPLOAD_FOLDER = 'static/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
