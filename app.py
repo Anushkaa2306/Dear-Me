@@ -1,4 +1,5 @@
 import os
+import google.generativeai as genai
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -6,6 +7,30 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timezone
 
+@app.route('/analyze/<int:id>')
+@login_required
+def analyze_entry(id):
+    entry = DiaryEntry.query.get_or_404(id)
+    if entry.user_id != current_user.id:
+        return redirect(url_for('index'))
+
+    prompt = f"""
+    You are the 'Chronos AI' mentor. Analyze this diary entry: "{entry.content}"
+    Provide a brief summary, a motivational insight, and one futuristic quote.
+    Tone: Empathetic, encouraging, and Cyber-Pink themed.
+    """     
+    
+    try:
+        response = ai_model.generate_content(prompt)
+        # We'll flash the AI's response to the UI
+        flash(response.text, "ai_glow")
+    except Exception as e:
+        flash("AI link unstable. Check API key.", "error")
+        
+    return redirect(url_for('diary'))
+# Configure AI Core
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+ai_model = genai.GenerativeModel('gemini-1.5-flash')
 app = Flask(__name__)
 app.secret_key = "chronos_vault_ultra_secret"
 

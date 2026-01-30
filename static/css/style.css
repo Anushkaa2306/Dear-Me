@@ -85,3 +85,53 @@
         .reveal-text { margin-top: 15px; padding: 15px; background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
         .delete-btn { background: white; color: red; padding: 5px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: bold; }
         .alert { background: #00f2ff; color: black; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+
+
+        /* AI Hologram Container */
+.ai-hologram {
+    background: rgba(0, 242, 255, 0.1);
+    border: 2px solid #00f2ff;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.3);
+    animation: flicker 2s infinite;
+}
+
+.ai-title {
+    color: #00f2ff;
+    font-family: 'Goldman', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.ai-text {
+    color: #fff;
+    line-height: 1.6;
+    font-style: italic;
+    white-space: pre-line; /* Keeps the AI's line breaks */
+}
+
+/* AI Sync Button Style */
+.ai-sync-btn {
+    background: #00f2ff;
+    color: black !important;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.ai-sync-btn:hover {
+    box-shadow: 0 0 15px #00f2ff;
+    transform: scale(1.05);
+}
+
+@keyframes flicker {
+    0% { opacity: 0.9; }
+    50% { opacity: 1; }
+    100% { opacity: 0.9; }
+}

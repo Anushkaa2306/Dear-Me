@@ -2,37 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chronos Vault</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Chronos Vault | AI Enhanced</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-<div class="profile-box">
-    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="profile-img">
-    <div style="font-weight: bold; margin-bottom: 5px;">{{ current_user.username }}</div>
-    <a href="/logout" style="text-decoration: none; color: #ff4d4d; font-size: 11px; font-weight: bold;">
-        <i class="fa-solid fa-power-off"></i> LOGOUT
-    </a>
-</div>
+
+    <div class="profile-box mobile-only">
+        <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_pic) if current_user.profile_pic else 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" class="profile-img">
+        <div style="font-weight: bold; margin-bottom: 5px;">{{ current_user.username }}</div>
+        <a href="/logout" style="text-decoration: none; color: #ff4d4d; font-size: 11px; font-weight: bold;">
+            <i class="fa-solid fa-power-off"></i> LOGOUT
+        </a>
+    </div>
+
     <div class="sidebar">
-<div class="profile-box">
-    <label for="photo-input" style="cursor: pointer; position: relative; display: inline-block;">
-        <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_pic) if current_user.profile_pic else 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" 
-             class="profile-img" 
-             style="object-fit: cover;">
-        <div style="position: absolute; bottom: 10px; right: 0; background: var(--glass-pink); border-radius: 50%; width: 25px; height: 25px; display: flex; align-items: center; justify-content: center; border: 1px solid white;">
-            <i class="fa-solid fa-camera" style="font-size: 10px; color: black;"></i>
+        <div class="profile-box">
+            <label for="photo-input" style="cursor: pointer; position: relative; display: inline-block;">
+                <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_pic) if current_user.profile_pic else 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" 
+                     class="profile-img" 
+                     style="object-fit: cover;">
+                <div class="camera-icon">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+            </label>
+
+            <form action="/upload_photo" method="POST" enctype="multipart/form-data" id="photo-form" style="display: none;">
+                <input type="file" name="photo" id="photo-input" accept="image/*" onchange="document.getElementById('photo-form').submit()">
+            </form>
+
+            <div style="font-weight: bold; margin-top: 10px;">{{ current_user.username }}</div>
+            <a href="/logout" class="logout-link">[ LOGOUT ]</a>
         </div>
-    </label>
-
-    <form action="/upload_photo" method="POST" enctype="multipart/form-data" id="photo-form" style="display: none;">
-        <input type="file" name="photo" id="photo-input" accept="image/*" onchange="document.getElementById('photo-form').submit()">
-    </form>
-
-    <div style="font-weight: bold; margin-top: 10px;">{{ current_user.username }}</div>
-    <a href="/logout" style="text-decoration: none; color: #ff4d4d; font-size: 11px; font-weight: bold;">[ LOGOUT ]</a>
-</div>
+        
         <nav class="nav-links">
             <a href="/" class="{{ 'active' if active_page == 'home' }}"><i class="fa-solid fa-house"></i> Vault Home</a>
             <a href="/diary" class="{{ 'active' if active_page == 'diary' }}"><i class="fa-solid fa-book"></i> My Diary</a>
@@ -44,8 +47,19 @@
         <div class="main-layout">
             
             <div class="content-area">
-                {% with messages = get_flashed_messages() %}
-                    {% if messages %}{% for m in messages %}<div class="alert">{{ m }}</div>{% endfor %}{% endif %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, m in messages %}
+                            {% if category == 'ai_glow' %}
+                                <div class="ai-hologram">
+                                    <div class="ai-title"><i class="fa-solid fa-microchip"></i> CHRONOS AI ANALYSIS</div>
+                                    <div class="ai-text">{{ m }}</div>
+                                </div>
+                            {% else %}
+                                <div class="alert {{ category }}">{{ m }}</div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                 {% endwith %}
 
                 {% if active_page == 'home' %}
@@ -53,37 +67,20 @@
                     <div class="input-card">
                         <form action="/bury" method="POST">
                             <textarea name="message" placeholder="Seal a thought for the future..." required></textarea>
-                            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                                <input type="date" name="unlock_date" required style="flex: 1; padding: 10px; border-radius: 8px; border:none;">
-                                <button type="submit" style="padding: 10px 25px; background: #00f2ff; border:none; border-radius: 8px; font-weight: bold; cursor:pointer;">SEAL</button>
+                            <div class="input-row">
+                                <input type="date" name="unlock_date" required>
+                                <button type="submit" class="seal-btn">SEAL</button>
                             </div>
                         </form>
                     </div>
 
-                    <h3 style="color: #f6b7b7; font-family: 'Goldman';">PENDING TRANSMISSIONS</h3>
+                    <h3 class="section-title">PENDING TRANSMISSIONS</h3>
                     <div class="list">
                         {% for capsule in capsules %}
                             <div class="capsule-item">
                                 <div>
-                                    <small style="color: #222; font-weight: bold;">Unlocks: {{ capsule.unlock_date.strftime('%d %b %Y') }}</small>
-                                    <div style="color: rgba(0,0,0,0.4); font-size: 12px;"><i class="fa-solid fa-lock"></i> Encrypted</div>
-                                </div>
-                                <a href="{{ url_for('delete', id=capsule.id) }}" class="delete-btn">Remove</a>
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                {% elif active_page == 'history' %}
-                    <h1>VAULT HISTORY</h1>
-                    <div class="list">
-                        {% for capsule in capsules %}
-                            <div class="capsule-item">
-                                <div style="flex: 1;">
-                                    <small style="color: #000; font-weight: bold;">{{ capsule.unlock_date.strftime('%d %b %Y') }}</small>
-                                    <details>
-                                        <summary style="color:#222; font-size:14px;">(Decrypt) <i class="fa-solid fa-chevron-down"></i></summary>
-                                        <div class="reveal-text">🔓 {{ capsule.message }}</div>
-                                    </details>
+                                    <small class="unlock-date">Unlocks: {{ capsule.unlock_date.strftime('%d %b %Y') }}</small>
+                                    <div class="encrypted-tag"><i class="fa-solid fa-lock"></i> Encrypted</div>
                                 </div>
                                 <a href="{{ url_for('delete', id=capsule.id) }}" class="delete-btn">Remove</a>
                             </div>
@@ -94,45 +91,60 @@
                     <h1>PERSONAL DIARY</h1>
                     <div class="input-card">
                         <form action="/diary" method="POST">
-                            <textarea name="content" placeholder="Log your thoughts..." required style="height: 120px;"></textarea>
-                            <button type="submit" style="width: 100%; padding: 12px; background: #f6b7b7; border:none; border-radius: 8px; font-weight: bold; cursor:pointer; margin-top: 10px;">SAVE LOG</button>
+                            <textarea name="content" placeholder="Log your thoughts... Chronos AI is listening." required style="height: 120px;"></textarea>
+                            <button type="submit" class="save-btn">SAVE LOG</button>
                         </form>
                     </div>
+
                     {% for entry in entries %}
                         <div class="diary-entry">
-                            <details style="width:100%">
-                                <summary style="display:flex; justify-content:space-between; align-items:center;">
-                                    <div>
-                                        <small style="color: #222; font-weight: bold;">{{ entry.date_posted.strftime('%d %b %Y | %H:%M') }}</small>
-                                    </div>
+                            <div class="diary-header">
+                                <small>{{ entry.date_posted.strftime('%d %b %Y | %H:%M') }}</small>
+                                <div class="diary-actions">
+                                    <a href="{{ url_for('analyze_entry', id=entry.id) }}" class="ai-sync-btn" title="AI Analysis">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI SYNC
+                                    </a>
                                     <a href="{{ url_for('delete_diary', id=entry.id) }}" class="delete-btn"><i class="fa-solid fa-trash"></i></a>
-                                </summary>
-                                <div class="reveal-text">{{ entry.content }}</div>
-                            </details>
+                                </div>
+                            </div>
+                            <div class="reveal-text">{{ entry.content }}</div>
                         </div>
                     {% endfor %}
+
+                {% elif active_page == 'history' %}
+                    <h1>VAULT HISTORY</h1>
+                    <div class="list">
+                        {% for capsule in capsules %}
+                            <div class="capsule-item">
+                                <div style="flex: 1;">
+                                    <small style="color: #000; font-weight: bold;">{{ capsule.unlock_date.strftime('%d %b %Y') }}</small>
+                                    <details>
+                                        <summary>(Decrypt) <i class="fa-solid fa-chevron-down"></i></summary>
+                                        <div class="reveal-text">🔓 {{ capsule.message }}</div>
+                                    </details>
+                                </div>
+                                <a href="{{ url_for('delete', id=capsule.id) }}" class="delete-btn">Remove</a>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endif %}
             </div>
 
             {% if active_page == 'home' %}
             <aside class="history-sidebar">
-                <div style="color: #00f2ff; font-size: 0.7rem; font-weight:bold; margin-bottom: 5px; text-transform:uppercase;">
+                <div class="status-tag">
                     <i class="fa-solid fa-crosshairs"></i> Target Status
                 </div>
                 
                 {% if todays_capsules %}
                     {% for today in todays_capsules %}
                     <div class="today-target-card">
-                        <div class="target-header">
-                            <i class="fa-solid fa-heart heart-pulse"></i> Today's Target
-                        </div>
-                        <div class="history-msg" style="font-weight:600; font-size:1.1rem;">{{ today.message }}</div>
+                        <div class="target-header"><i class="fa-solid fa-heart heart-pulse"></i> Today's Target</div>
+                        <div class="history-msg">{{ today.message }}</div>
                     </div>
                     {% endfor %}
                 {% else %}
-                    <div style="border: 2px dashed rgba(255,255,255,0.2); padding: 15px; border-radius: 20px; text-align: center; color: rgba(255,255,255,0.4); margin-bottom: 25px;">
-                        No targets today. Rest easy.
-                    </div>
+                    <div class="empty-status">No targets today. Rest easy.</div>
                 {% endif %}
 
                 <h2><i class="fa-solid fa-clock-rotate-left"></i> RECENT LOGS</h2>
