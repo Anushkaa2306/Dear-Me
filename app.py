@@ -7,34 +7,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timezone
 
-@app.route('/analyze/<int:id>')
-@login_required
-def analyze_entry(id):
-    entry = DiaryEntry.query.get_or_404(id)
-    if entry.user_id != current_user.id:
-        return redirect(url_for('index'))
-
-    prompt = f"""
-    You are the 'Chronos AI' mentor. Analyze this diary entry: "{entry.content}"
-    Provide a brief summary, a motivational insight, and one futuristic quote.
-    Tone: Empathetic, encouraging, and Cyber-Pink themed.
-    """     
-    
-    try:
-        response = ai_model.generate_content(prompt)
-        # We'll flash the AI's response to the UI
-        flash(response.text, "ai_glow")
-    except Exception as e:
-        flash("AI link unstable. Check API key.", "error")
-        
-    return redirect(url_for('diary'))
-# Configure AI Core
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-ai_model = genai.GenerativeModel('gemini-1.5-flash')
+# 1. INITIALIZE APP & AI FIRST
 app = Flask(__name__)
 app.secret_key = "chronos_vault_ultra_secret"
 
-# 1. DATABASE CONFIG
+# Configure AI Core
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+ai_model = genai.GenerativeModel('gemini-1.5-flash')
+
+# 2. DATABASE CONFIG
 if os.environ.get('DATABASE_URL'):
     database_url = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 else:
@@ -43,14 +24,14 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 2. UPLOAD CONFIG
+# 3. UPLOAD CONFIG
 UPLOAD_FOLDER = 'static/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 
 
 db = SQLAlchemy(app)
 
-# 3. MODELS (Must be defined before db.create_all())
+# 4. MODELS
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -72,7 +53,7 @@ class DiaryEntry(db.Model):
     date_posted = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-# 4. INITIALIZE TABLES
+# 5. INITIALIZE TABLES
 with app.app_context():
     try:
         db.create_all()
@@ -80,7 +61,7 @@ with app.app_context():
     except Exception as e:
         print(f"Database error: {e}")
 
-# 5. LOGIN MANAGER
+# 6. LOGIN MANAGER
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -89,6 +70,28 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # --- ROUTES ---
+
+@app.route('/analyze/<int:id>')
+@login_required
+def analyze_entry(id):
+    entry = DiaryEntry.query.get_or_404(id)
+    if entry.user_id != current_user.id:
+        return redirect(url_for('diary'))
+
+    prompt = f"""
+    You are the 'Chronos AI' mentor. Analyze this diary entry: "{entry.content}"
+    Provide a brief summary, a motivational insight, and one futuristic quote.
+    Tone: Empathetic, encouraging, and Cyber-Pink themed.
+    """     
+    
+    try:
+        response = ai_model.generate_content(prompt)
+        # Category 'ai_glow' triggers your special holographic CSS
+        flash(response.text, "ai_glow")
+    except Exception as e:
+        flash("AI link unstable. Check API key.", "error")
+        
+    return redirect(url_for('diary'))
 
 @app.route('/upload_photo', methods=['POST'])
 @login_required
@@ -171,6 +174,15 @@ def diary():
         return redirect(url_for('diary'))
     entries = DiaryEntry.query.filter_by(user_id=current_user.id).order_by(DiaryEntry.date_posted.desc()).all()
     return render_template('index.html', entries=entries, active_page='diary')
+
+@app.route('/delete_diary/<int:id>')
+@login_required
+def delete_diary(id):
+    entry = DiaryEntry.query.get_or_404(id)
+    if entry.user_id == current_user.id:
+        db.session.delete(entry)
+        db.session.commit()
+    return redirect(url_for('diary'))
 
 @app.route('/bury', methods=['POST'])
 @login_required
