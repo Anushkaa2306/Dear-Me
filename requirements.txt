@@ -2,5 +2,5 @@ Flask
 Flask-SQLAlchemy
 Flask-Login
 Werkzeug
-psycopg2-binary
 google-generativeai
+psycopg2-binary
