@@ -1,0 +1,10 @@
+# Secrets
+.env
+
+# Database (keep your local data local)
+chronos.db
+
+# Python clutter
+__pycache__/
+*.pyc
+.venv/
