@@ -12,7 +12,7 @@
     <div class="profile-box mobile-only">
         <img src="{{ url_for('static', filename='profile_pics/' + current_user.profile_pic) if current_user.profile_pic else 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" class="profile-img">
         <div style="font-weight: bold; margin-bottom: 5px;">{{ current_user.username }}</div>
-        <a href="/logout" style="text-decoration: none; color: #ff4d4d; font-size: 11px; font-weight: bold;">
+        <a href="/logout" class="logout-link">
             <i class="fa-solid fa-power-off"></i> LOGOUT
         </a>
     </div>
@@ -69,7 +69,7 @@
                             <textarea name="message" placeholder="Seal a thought for the future..." required></textarea>
                             <div class="input-row">
                                 <input type="date" name="unlock_date" required>
-                                <button type="submit" class="seal-btn">SEAL</button>
+                                <button type="submit" class="save-btn">SEAL</button>
                             </div>
                         </form>
                     </div>
@@ -87,30 +87,46 @@
                         {% endfor %}
                     </div>
 
-                {% elif active_page == 'diary' %}
-                    <h1>PERSONAL DIARY</h1>
-                    <div class="input-card">
-                        <form action="/diary" method="POST">
-                            <textarea name="content" placeholder="Log your thoughts... Chronos AI is listening." required style="height: 120px;"></textarea>
-                            <button type="submit" class="save-btn">SAVE LOG</button>
-                        </form>
-                    </div>
+              {% elif active_page == 'diary' %}
+    <h1>PERSONAL DIARY</h1>
+    <div class="input-card">
+        <form action="/diary" method="POST">
+            <textarea name="content" placeholder="Log your thoughts... Chronos AI is listening." required style="height: 100px;"></textarea>
+            <button type="submit"  class="save-btn">SAVE LOG</button>
+        </form>
+    </div>
 
-                    {% for entry in entries %}
-                        <div class="diary-entry">
-                            <div class="diary-header">
-                                <small>{{ entry.date_posted.strftime('%d %b %Y | %H:%M') }}</small>
-                                <div class="diary-actions">
-                                    <a href="{{ url_for('analyze_entry', id=entry.id) }}" class="ai-sync-btn" title="AI Analysis">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> AI SYNC
-                                    </a>
-                                    <a href="{{ url_for('delete_diary', id=entry.id) }}" class="delete-btn"><i class="fa-solid fa-trash"></i></a>
-                                </div>
-                            </div>
-                            <div class="reveal-text">{{ entry.content }}</div>
-                        </div>
-                    {% endfor %}
 
+{% for entry in entries %}
+<div class="diary-entry">
+    <div class="diary-header">
+      <small class="date"> <b> {{ entry.date_posted.strftime('%H:%M | %d %b %Y') }}</b></small>
+        <a href="{{ url_for('delete_diary', id=entry.id) }}" class="delete-btn"><i class="fa-solid fa-trash"></i></a>
+    </div>
+
+    <div class="reveal-text" id="content-{{ entry.id }}">
+        {{ entry.content }}
+    </div>
+
+    {% if entry.ai_analysis %}
+    <div class="ai-hologram" style="margin-top: 15px; border-left: 3px solid #ff00ff; background: rgba(255, 0, 255, 0.05); padding: 15px; border-radius: 5px;">
+        <div class="ai-title" style="color: #ff00ff; font-family: 'Goldman'; font-size: 0.7rem; margin-bottom: 5px;">
+            <i class="fa-solid fa-microchip"></i> CHRONOS NEURAL LOG
+        </div>
+        <div class="ai-text" style="font-size: 0.9rem; color: #e0e0e0; line-height: 1.4;">
+            {{ entry.ai_analysis | safe }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="diary-actions-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <button class="read-more-btn" onclick="toggleExpand('{{ entry.id }}', this)">READ MORE</button>
+        <a href="{{ url_for('analyze_entry', id=entry.id) }}" class="ai-sync-btn" style="text-decoration: none; color: #00ffff; font-weight: bold; font-size: 0.8rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> ANALYSE YOUR EMOTIONS
+        </a>
+    </div>
+</div>
+{% endfor %}
                 {% elif active_page == 'history' %}
                     <h1>VAULT HISTORY</h1>
                     <div class="list">

@@ -1,5 +1,6 @@
 import os
-import google.generativeai as genai
+from dotenv import load_dotenv 
+from groq import Groq  # 1. Changed import from Google to Groq
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -7,15 +8,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime, timezone
 
-# 1. INITIALIZE APP & AI FIRST
+# 1. LOAD ENVIRONMENT VARIABLES
+load_dotenv() 
+
+# 2. INITIALIZE FLASK APP
 app = Flask(__name__)
 app.secret_key = "chronos_vault_ultra_secret"
 
-# Configure AI Core
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-ai_model = genai.GenerativeModel('gemini-1.5-flash')
+# 3. CONFIGURE GROQ AI CORE
+# This looks for GROQ_API_KEY in your .env file
+groq_key = os.environ.get("GROQ_API_KEY", "").strip()
 
-# 2. DATABASE CONFIG
+if groq_key:
+    client = Groq(api_key=groq_key)
+    print(f"--- GROQ AI READY (Key starts with: {groq_key[:7]}...) ---")
+else:
+    client = None
+    print("--- ERROR: NO GROQ_API_KEY FOUND IN ENV ---")
+
+# 4. DATABASE CONFIG
 if os.environ.get('DATABASE_URL'):
     database_url = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 else:
@@ -24,14 +35,14 @@ else:
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# 3. UPLOAD CONFIG
+# 5. UPLOAD CONFIG
 UPLOAD_FOLDER = 'static/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 
 
 db = SQLAlchemy(app)
 
-# 4. MODELS
+# 6. MODELS
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
@@ -53,15 +64,14 @@ class DiaryEntry(db.Model):
     date_posted = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-# 5. INITIALIZE TABLES
+# 7. INITIALIZE TABLES
 with app.app_context():
     try:
         db.create_all()
-        print("Database tables initialized!")
     except Exception as e:
         print(f"Database error: {e}")
 
-# 6. LOGIN MANAGER
+# 8. LOGIN MANAGER
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
@@ -78,19 +88,34 @@ def analyze_entry(id):
     if entry.user_id != current_user.id:
         return redirect(url_for('diary'))
 
-    prompt = f"""
-    You are the 'Chronos AI' mentor. Analyze this diary entry: "{entry.content}"
-    Provide a brief summary, a motivational insight, and one futuristic quote.
-    Tone: Empathetic, encouraging, and Cyber-Pink themed.
-    """     
-    
+    if not client:
+        flash("AI System Offline: Missing Groq Key.", "error")
+        return redirect(url_for('diary'))
     try:
-        response = ai_model.generate_content(prompt)
-        # Category 'ai_glow' triggers your special holographic CSS
-        flash(response.text, "ai_glow")
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are Chronos AI. Your output must be short, impactful, and formatted in Markdown. "
+                        "Use exactly three sections: "
+                        " ⚡ NEURAL SUMMARY (1 sentence) "
+                         "🌸 CORE INSIGHT (1 sentence) "
+                        " 🚀 FUTURE CODE (1 quote) "
+                        "Tone: Neon-noir, empathetic, futuristic."
+                    )
+                },
+                {"role": "user", "content": entry.content}
+            ],
+            temperature=0.8,
+            max_tokens=200
+        )
+        ai_response = completion.choices[0].message.content
+        flash(ai_response, "ai_glow")
     except Exception as e:
-        flash("AI link unstable. Check API key.", "error")
-        
+        flash(f"Transmission Interrupted: {str(e)[:30]}", "error")
+
     return redirect(url_for('diary'))
 
 @app.route('/upload_photo', methods=['POST'])
