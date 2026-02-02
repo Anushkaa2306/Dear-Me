@@ -12,7 +12,9 @@ from datetime import datetime, timezone
 load_dotenv() 
 
 # 2. INITIALIZE FLASK APP
-app = Flask(__name__)
+app = Flask(__name__, 
+            template_folder="../templates", 
+            static_folder="../static")
 app.secret_key = "chronos_vault_ultra_secret"
 
 # 3. CONFIGURE GROQ AI CORE
