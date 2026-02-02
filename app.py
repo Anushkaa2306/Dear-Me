@@ -28,13 +28,19 @@ else:
 
 # 4. DATABASE CONFIG
 if os.environ.get('DATABASE_URL'):
+    # This part is for professional databases like PostgreSQL
     database_url = os.environ.get('DATABASE_URL').replace("postgres://", "postgresql://", 1)
 else:
-    database_url = 'sqlite:///chronos.db'
+    # UPDATED FOR VERCEL COMPATIBILITY
+    # When running locally, it uses chronos.db in your folder.
+    # When on Vercel, it uses the /tmp folder so the app doesn't crash.
+    if os.environ.get('VERCEL'):
+        database_url = 'sqlite:////tmp/chronos.db'
+    else:
+        database_url = 'sqlite:///chronos.db'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 # 5. UPLOAD CONFIG
 UPLOAD_FOLDER = 'static/profile_pics'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
