@@ -34,13 +34,11 @@ else:
     # UPDATED FOR VERCEL COMPATIBILITY
     # When running locally, it uses chronos.db in your folder.
     # When on Vercel, it uses the /tmp folder so the app doesn't crash.
-   # Around line 35 in app.py
-if os.environ.get('VERCEL'):
-    # This allows the database to be created in Vercel's only writable folder
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/chronos.db'
-else:
-    # This keeps your local database working on your MacBook
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///chronos.db'
+    if os.environ.get('VERCEL'):
+        database_url = 'sqlite:////tmp/chronos.db'
+    else:
+        database_url = 'sqlite:///chronos.db'
+
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # 5. UPLOAD CONFIG
