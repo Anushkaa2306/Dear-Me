@@ -11,7 +11,9 @@
       "dest": "app.py"
     }
   ],
+  "version": 2,
   "rewrites": [
+    
     { "source": "/(.*)", "destination": "/api/index" }
   ]
 }
