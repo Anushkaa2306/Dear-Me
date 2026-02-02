@@ -140,7 +140,7 @@
 .ai-title {
     color: #f4f6f7;
     font-family: 'Goldman', sans-serif;
-    font-size: 0.8rem;
+    font-size: 1.5  rem;
     letter-spacing: 2px;
     margin-bottom: 10px;
 }
@@ -170,9 +170,9 @@
 }
 
 @keyframes flicker {
-    0% { opacity: 0.9; }
+    0% { opacity: 0.6; }
     50% { opacity: 1; }
-    100% { opacity: 0.9; }
+    100% { opacity: 0.6; }
 }
 /* The Holographic AI Box */
 /* Update your existing .ai_glow */

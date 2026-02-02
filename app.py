@@ -100,9 +100,9 @@ def analyze_entry(id):
                     "content": (
                         "You are Chronos AI. Your output must be short, impactful, and formatted in Markdown. "
                         "Use exactly three sections: "
-                        " ⚡ NEURAL SUMMARY (1 sentence) "
+                        "⚡ NEURAL SUMMARY (1 sentence) "
                          "🌸 CORE INSIGHT (1 sentence) "
-                        " 🚀 FUTURE CODE (1 quote) "
+                        "🚀 FUTURE CODE (1 quote) "
                         "Tone: Neon-noir, empathetic, futuristic."
                     )
                 },
