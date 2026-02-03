@@ -1,6 +1,6 @@
-Flask
-Flask-SQLAlchemy
-Flask-Login
-Werkzeug
-google-generativeai
+flask
+flask-sqlalchemy
+flask-login
+groq
+python-dotenv
 psycopg2-binary

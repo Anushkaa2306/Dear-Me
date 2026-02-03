@@ -17,7 +17,7 @@ app = Flask(__name__,
             template_folder="../templates", 
             static_folder="../static")
 app.secret_key = "chronos_vault_ultra_secret"
-
+app.config['SECRET_KEY'] = os.environ.get("FLASK_SECRET_KEY", "dev-key-only")
 # 3. CONFIGURE GROQ AI CORE
 # This looks for GROQ_API_KEY in your .env file
 groq_key = os.environ.get("GROQ_API_KEY", "").strip()
@@ -240,4 +240,4 @@ def delete(id):
     return redirect(request.referrer or url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True)
